@@ -20,7 +20,6 @@ import java.util.Random;
 
 public class ConwaysFX extends Application {
     /**
-     * Creator: Bogdan Ursu
      * Aims: create a conways game of life, with a 10^2 board.
      * progress:
      * 16/8/26 - got the thing to start, started coding the main project
@@ -45,9 +44,8 @@ public class ConwaysFX extends Application {
 
     public static int iGap = 1;
 
-    public static int iSize = 100;
+    public static int iSize = 50;
     public static int iButtonSize;
-
 
     public static int iPadding = 10;
 
@@ -269,24 +267,33 @@ public class ConwaysFX extends Application {
         updateLabels();
     }
 
-        private static int countNeighbours(int i, int j) {
-            int count = 0;
-            for (int di = -1; di <= 1; di++)
+        private static int countNeighbours(int xPos, int yPos) {
+            int iCount = 0;
+
+            int i = 0;
+            int j = 0;
+            int iBoundry = 0;
+            int jBoundry = 0;
+
+            for (i = -1; i <= 1; i++)
             {
-                for (int dj = -1; dj <= 1; dj++)
+                for (j = -1; j <= 1; j++)
                 {
-                    if (di == 0 && dj == 0) continue;
+                    if (i == 0 && j == 0) continue; // skips the thing if it on itself
 
-                    int ni = i + di;
-                    int nj = j + dj;
+                    iBoundry = xPos + i;
+                    jBoundry = yPos + j;
 
-                    if (ni >= 0 && ni < iSize && nj >= 0 && nj < iSize)
+                    if (iBoundry >= 0 && iBoundry < iSize && jBoundry >= 0 && jBoundry < iSize)
                     {
-                        if (iBoard[ni][nj] == 1) count++;
+                        if (iBoard[iBoundry][jBoundry] == 1)
+                        {
+                            iCount++;
+                        }
                     }
                 }
             }
-            return count;
+            return iCount;
         }
 
     public static void toggleAuto() {

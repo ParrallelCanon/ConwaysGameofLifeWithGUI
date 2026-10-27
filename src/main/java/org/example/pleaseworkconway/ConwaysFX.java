@@ -28,6 +28,7 @@ public class ConwaysFX extends Application {
      * 21/8/26 - added the feature where when you toggle a cell directly it stops the timeline
      * 24/10/26 - added the inversley proportional button size feature, and started to perfect it
      *  also added the section to make it not go over the screen, no matter the resolution
+     * 27/10/27 - added the starter stage, in order to let people change their simulation settings
      *
      * What did I learn?
      *      Basic functions of JavaFX
@@ -56,6 +57,12 @@ public class ConwaysFX extends Application {
     public static int[][] iBoard;
     public static Button[][] btnCells;
 
+    public static int iMinSurvive = 2;
+    public static int iMaxSurvive = 3;
+
+    public static int iMinBirth = 3;
+    public static int iMaxBirth = 3;
+
     public static Label lblGens;
     public static Label lblPopul;
 
@@ -74,10 +81,12 @@ public class ConwaysFX extends Application {
     public static boolean neighbourToBool(int iNCount, boolean bAlive) {
         boolean bBool;
 
-        if (bAlive) {
-            bBool = (iNCount == 2 || iNCount == 3);
-        } else {
-            bBool = (iNCount == 3);
+        if (bAlive)
+        {
+            bBool = (iNCount >= iMinSurvive && iNCount <= iMaxSurvive);
+        } else
+        {
+            bBool = (iNCount >= iMinBirth && iNCount <= iMaxBirth);
         }
 
         return (bBool);
@@ -96,6 +105,8 @@ public class ConwaysFX extends Application {
                 }
             }
         }
+
+        updateLabels();
     }
 
     //start to do the GUI
@@ -106,22 +117,132 @@ public class ConwaysFX extends Application {
         dScreenHeight = Screen.getPrimary().getVisualBounds().getHeight();
         dScreenWidth = Screen.getPrimary().getVisualBounds().getWidth();
 
-        GridPane grid = buildGrid();
-        VBox sidePanel = buildSidePanel();
+        VBox starterPanel = buildStarterPanel();
 
-        BorderPane root = new BorderPane();
-        root.setCenter(grid);
-        root.setRight(sidePanel);
+        BorderPane starterRoot = new BorderPane();
+        starterRoot.setCenter(starterPanel);
 
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
+        Scene starter = new Scene(starterRoot);
+
+        stage.setWidth(512);
+
+        stage.setScene(starter);
         stage.setTitle("Conway's Game of Life");
         stage.show();
-        updateLabels();
     }
 
+    public static Button btnStart;
+
+    public static VBox buildStarterPanel()
+    {
+        Label explain = new Label("Enter the settings for the simulation.");
+
+        //size
+        Slider sldSize = new Slider(5, 100, 50);
+        sldSize.setShowTickLabels(true);
+        sldSize.setShowTickMarks(true);
+
+        Label lblSize = new Label("Enter the size of the grid");
+        sldSize.valueProperty().addListener((obs, oldVal, newVal) -> {
+            lblSize.setText("Grid Size: " + newVal.intValue());
+                iSize = (newVal.intValue());
+        });
+
+        //min survive
+
+            //explaining what that means
+            Label explainTwo = new Label("These are the conditions for the game, with it creating the 'Conways Multiverse' (A name I know from youtuber \"carykh\"), with the minimum and maximum for cells to survive or be born. However, it is limited to connected rulestrings. The default configuration is the default configuration for Conway's Game of Life.");
+            explainTwo.setWrapText(true);
+            explainTwo.setMaxWidth(512);
+            explainTwo.setAlignment(Pos.CENTER);
+
+
+        Slider sldMinSurvive = new Slider(0, 8, 2);
+        sldMinSurvive.setShowTickLabels(true);
+        sldMinSurvive.setShowTickMarks(true);
+
+        Label lblMinSurvive = new Label("Enter the minimum neighbour count to survive");
+        sldMinSurvive.valueProperty().addListener((obs, oldVal, newVal) -> {
+            lblMinSurvive.setText("Minimum size to survive: " + newVal.intValue());
+            iMinSurvive = (newVal.intValue());
+        });
+
+        //max survive
+        Slider sldMaxSurvive = new Slider(0, 8, 3);
+        sldMaxSurvive.setShowTickLabels(true);
+        sldMaxSurvive.setShowTickMarks(true);
+
+        Label lblMaxSurvive = new Label("Enter the maximum neighbour count to survive");
+        sldMaxSurvive.valueProperty().addListener((obs, oldVal, newVal) -> {
+            lblMaxSurvive.setText("Maximum size to survive: " + newVal.intValue());
+            iMaxSurvive = (newVal.intValue());
+        });
+
+        //min birth
+        Slider sldMinBirth = new Slider(0, 8, 3);
+        sldMinBirth.setShowTickLabels(true);
+        sldMinBirth.setShowTickMarks(true);
+
+        Label lblMinBirth = new Label("Enter the minimum neighbour count to be born");
+        sldMinBirth.valueProperty().addListener((obs, oldVal, newVal) -> {
+            lblMinBirth.setText("Minimum size to be born: " + newVal.intValue());
+            iMinBirth = (newVal.intValue());
+        });
+
+        //max birth
+        Slider sldMaxBirth = new Slider(0, 8, 3);
+        sldMaxBirth.setShowTickLabels(true);
+        sldMaxBirth.setShowTickMarks(true);
+
+        Label lblMaxBirth = new Label("Enter the maximum neighbour count to be born");
+        sldMaxBirth.valueProperty().addListener((obs, oldVal, newVal) -> {
+            lblMaxBirth.setText("Maximum size to be born: " + newVal.intValue());
+            iMaxBirth = (newVal.intValue());
+        });
+
+        //button to start
+        btnStart = new Button("Start the simulation.");
+        btnStart.setOnAction(e -> startButton());
+
+        VBox panel = new VBox(8, explain, lblSize, sldSize, explainTwo, lblMinSurvive, sldMinSurvive, lblMaxSurvive, sldMaxSurvive, lblMinBirth, sldMinBirth, lblMaxBirth, sldMaxBirth, btnStart);
+
+        panel.setAlignment(Pos.CENTER);
+
+        panel.setPrefWidth(512);
+
+        return(panel);
+    }
+
+        public static void startButton()
+        {
+            if((iMaxBirth < iMinBirth) || (iMaxSurvive < iMinSurvive))
+            {
+                return;
+            }
+
+
+            Stage stage = (Stage) btnStart.getScene().getWindow();
+
+            GridPane grid = buildGrid();
+            VBox sidePanel = buildSidePanel();
+
+            BorderPane root = new BorderPane();
+            root.setCenter(grid);
+            root.setRight(sidePanel);
+
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("Conway's Game of Life");
+
+            stage.sizeToScene();
+            stage.centerOnScreen();
+
+            updateLabels();
+        }
+
+
     //create the grid
-    private GridPane buildGrid() {
+    private static GridPane buildGrid() {
         iSize = Math.min(100, iSize);
 
         int iButtonHeight = (int) ((dScreenHeight - 100 - (iSize - 1) * iGap - 2 * iPadding) / iSize);
@@ -189,7 +310,7 @@ public class ConwaysFX extends Application {
         }
 
     //side panel with all the things inside
-    VBox buildSidePanel() {
+    static VBox buildSidePanel() {
 
         //explaining label
         Label lblExplain = new Label("Press any cell to toggle it");
@@ -248,8 +369,8 @@ public class ConwaysFX extends Application {
             for (int j = 0; j < iSize; j++)
             {
                 int neighbours = countNeighbours(i, j);
-                boolean alive = iBoard[i][j] == 1;
-                next[i][j] = neighbourToBool(neighbours, alive) ? 1 : 0;
+                boolean bAlive = iBoard[i][j] == 1;
+                next[i][j] = neighbourToBool(neighbours, bAlive) ? 1 : 0;
             }
         }
 

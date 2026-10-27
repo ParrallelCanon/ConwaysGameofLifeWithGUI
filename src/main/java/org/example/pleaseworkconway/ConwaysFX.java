@@ -135,7 +135,7 @@ public class ConwaysFX extends Application {
 
     public static VBox buildStarterPanel()
     {
-        Label explain = new Label("Enter the settings for the simulation.");
+        Label explain = new Label("EPILEPSY WARNING: If you suffer from epileptic seizures or other issues, then do not increase the autospeed too high, for flashing lights..");
 
         //size
         Slider sldSize = new Slider(5, 100, 50);

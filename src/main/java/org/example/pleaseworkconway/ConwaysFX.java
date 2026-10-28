@@ -12,15 +12,18 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class ConwaysFX extends Application {
     /**
      * Aims: create a conways game of life, with a 10^2 board.
+     *
      * progress:
      * 16/8/26 - got the thing to start, started coding the main project
      * 17/8/26 - fixed all the logic issues in game, as well as making it functional, with GUI (autostep, step, randomise board, speed slider, pick which squares can be changed, endgame)
@@ -36,6 +39,8 @@ public class ConwaysFX extends Application {
      *      How to optimise conways game of life from my previous attempt (see the non-GUI version, as well as the GUI version)
      *      How to make a JavaFX Project
      */
+
+    // TODO - make it so the longer something lives it changes colours, so if it is alive then it will be new, but not reset when it dies so it can be a different colour from the others
 
     //creating the way to make the things
     public static Random rand = new Random();
@@ -56,12 +61,6 @@ public class ConwaysFX extends Application {
 
     public static int[][] iBoard;
     public static Button[][] btnCells;
-
-    public static int iMinSurvive = 2;
-    public static int iMaxSurvive = 3;
-
-    public static int iMinBirth = 3;
-    public static int iMaxBirth = 3;
 
     public static Label lblGens;
     public static Label lblPopul;
@@ -100,7 +99,8 @@ public class ConwaysFX extends Application {
 
         for (i = 0; i < iSize; i++) {
             for (j = 0; j < iSize; j++) {
-                if (iBoard[i][j] == 1) {
+                if (iBoard[i][j] > 0)
+                {
                     iPopul++;
                 }
             }
@@ -123,6 +123,7 @@ public class ConwaysFX extends Application {
         starterRoot.setCenter(starterPanel);
 
         Scene starter = new Scene(starterRoot);
+        starter.getStylesheets().add(ConwaysFX.class.getResource("darkMode.css").toExternalForm());
 
         stage.setWidth(512);
 
@@ -132,6 +133,11 @@ public class ConwaysFX extends Application {
     }
 
     public static Button btnStart;
+
+    public static int iMinSurvive = 2;
+    public static int iMaxSurvive = 3;
+    public static int iMinBirth = 3;
+    public static int iMaxBirth = 3;
 
     public static VBox buildStarterPanel()
     {
@@ -220,17 +226,22 @@ public class ConwaysFX extends Application {
                 return;
             }
 
-
             Stage stage = (Stage) btnStart.getScene().getWindow();
 
             GridPane grid = buildGrid();
             VBox sidePanel = buildSidePanel();
+
+            for (int i = 0; i < iSize; i++)
+            {
+                Arrays.fill(iBoard[i], -1);
+            }
 
             BorderPane root = new BorderPane();
             root.setCenter(grid);
             root.setRight(sidePanel);
 
             Scene scene = new Scene(root);
+            scene.getStylesheets().add(ConwaysFX.class.getResource("darkMode.css").toExternalForm());
             stage.setScene(scene);
             stage.setTitle("Conway's Game of Life");
 
@@ -272,7 +283,7 @@ public class ConwaysFX extends Application {
                 cell.setMinSize(iButtonSize, iButtonSize);
                 cell.setPrefSize(iButtonSize, iButtonSize);
                 cell.setMaxSize(iButtonSize, iButtonSize);
-                cell.setStyle(cellStyle(false));
+                cell.setStyle(cellStyle(-1));
 
                 final int fI = i;
                 final int fJ = j;
@@ -297,16 +308,57 @@ public class ConwaysFX extends Application {
                 timeline.stop();
                 bAutoRunning = false;
             }
-        iBoard[i][j] = (iBoard[i][j] == 1) ? 0 : 1;
-        btnCells[i][j].setStyle(cellStyle(iBoard[i][j] == 1));
+        iBoard[i][j] = (iBoard[i][j] > 0) ? 0 : 1;
+        btnCells[i][j].setStyle(cellStyle(iBoard[i][j]));
         checkPopul();
         }
 
         //shows how to change the colours of the btnCells
-        public static String cellStyle(boolean alive) {
-            return alive
-            ? "-fx-background-color: black;"
-            : "-fx-background-color: white; -fx-border-color: gray;";
+        public static String cellStyle(int iAliveness) {
+            if (iAliveness < 0)
+            {
+                return "-fx-background-color: rgb(105,105,105);";   // never alive
+            }
+            else if (iAliveness == 0)
+            {
+                return "-fx-background-color: rgb(169,169,169);";   // was alive, now dead
+            }
+            else if (iAliveness >= 128)
+            {
+                return "-fx-background-color: rgb(127,255,212);";
+            }
+            else if (iAliveness >= 64)
+            {
+                return "-fx-background-color: rgb(152,251,152);";
+            }
+            else if (iAliveness >= 32)
+            {
+                return "-fx-background-color: rgb(238,232,170);";
+            }
+            else if (iAliveness >= 16)
+            {
+                return "-fx-background-color: rgb(255,165,0);";
+            }
+            else if (iAliveness >= 8)
+            {
+                return "-fx-background-color: rgb(255,69,0);";
+            }
+            else if (iAliveness >= 4)
+            {
+                return "-fx-background-color: rgb(240,128,128);";
+            }
+            else if (iAliveness >= 2)
+            {
+                return "-fx-background-color: rgb(233,150,122);";
+            }
+            else if (iAliveness >= 1)
+            {
+                return "-fx-background-color: rgb(178,34,34);";
+            }
+            else
+            {
+                return "-fx-background-color: black;";   // should never be reached
+            }
         }
 
     //side panel with all the things inside
@@ -369,8 +421,25 @@ public class ConwaysFX extends Application {
             for (int j = 0; j < iSize; j++)
             {
                 int neighbours = countNeighbours(i, j);
-                boolean bAlive = iBoard[i][j] == 1;
-                next[i][j] = neighbourToBool(neighbours, bAlive) ? 1 : 0;
+                boolean bAlive = iBoard[i][j] > 0;
+                boolean bWillLive = neighbourToBool(neighbours, bAlive);
+
+                if (bWillLive && bAlive)
+                {
+                    next[i][j] = iBoard[i][j] + 1;   // survivor ages by one
+                }
+                else if (bWillLive && !bAlive)
+                {
+                    next[i][j] = 1;                  // newborn starts at 1
+                }
+                else if (!bWillLive && bAlive)
+                {
+                    next[i][j] = 0;                  // just died
+                }
+                else
+                {
+                    next[i][j] = iBoard[i][j];       // dead before and still dead: keep -1 or 0
+                }
             }
         }
 
@@ -379,13 +448,12 @@ public class ConwaysFX extends Application {
             for (int j = 0; j < iSize; j++)
             {
                 iBoard[i][j] = next[i][j];
-                btnCells[i][j].setStyle(cellStyle(iBoard[i][j] == 1));
+                btnCells[i][j].setStyle(cellStyle(iBoard[i][j]));
             }
         }
 
         iGens++;
         checkPopul();
-        updateLabels();
     }
 
         private static int countNeighbours(int xPos, int yPos) {
@@ -407,7 +475,7 @@ public class ConwaysFX extends Application {
 
                     if (iBoundry >= 0 && iBoundry < iSize && jBoundry >= 0 && jBoundry < iSize)
                     {
-                        if (iBoard[iBoundry][jBoundry] == 1)
+                        if (iBoard[iBoundry][jBoundry] > 0)
                         {
                             iCount++;
                         }
@@ -461,9 +529,9 @@ public class ConwaysFX extends Application {
         {
             for (int j = 0; j < iSize; j++)
             {
-                iBoard[i][j] = 0;
+                iBoard[i][j] = -1;
                 btnCells[i][j].setDisable(false);
-                btnCells[i][j].setStyle(cellStyle(false));
+                btnCells[i][j].setStyle(cellStyle(-1));
             }
         }
         iGens = 0;
@@ -474,12 +542,23 @@ public class ConwaysFX extends Application {
     public static void randBoard() {
         if (bEnd) return;
 
+        if(bAutoRunning)
+        {
+            bAutoRunning = false;
+            timeline.stop();
+        }
+
         for (int i = 0; i < iSize; i++)
         {
             for (int j = 0; j < iSize; j++)
             {
-                iBoard[i][j] = rand.nextInt(2); // 0 or 1
-                btnCells[i][j].setStyle(cellStyle(iBoard[i][j] == 1));
+                int iRand = 0;
+                do
+                {
+                    iRand = rand.nextInt(-1, 2);
+                }while(iRand == 0);
+                iBoard[i][j] = iRand;
+                btnCells[i][j].setStyle(cellStyle(iRand));
             }
         }
 

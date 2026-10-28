@@ -45,8 +45,6 @@ public class ConwaysFX extends Application {
      *      How to make a JavaFX Project
      */
 
-    // TODO - make it so the longer something lives it changes colours, so if it is alive then it will be new, but not reset when it dies so it can be a different colour from the others
-
     //creating the way to make the things
     public static Random rand = new Random();
 
@@ -147,6 +145,8 @@ public class ConwaysFX extends Application {
     public static VBox buildStarterPanel()
     {
         Label explain = new Label("EPILEPSY WARNING: If you suffer from epileptic seizures or other issues, then do not increase the autospeed too high, for flashing lights..");
+        explain.setWrapText(true);
+        explain.setMaxWidth(512);
 
         //size
         Slider sldSize = new Slider(5, 100, 50);
@@ -165,8 +165,6 @@ public class ConwaysFX extends Application {
             Label explainTwo = new Label("These are the conditions for the game, with it creating the 'Conways Multiverse' (A name I know from youtuber \"carykh\"), with the minimum and maximum for cells to survive or be born. However, it is limited to connected rulestrings. The default configuration is the default configuration for Conway's Game of Life.");
             explainTwo.setWrapText(true);
             explainTwo.setMaxWidth(512);
-            explainTwo.setAlignment(Pos.CENTER);
-
 
         Slider sldMinSurvive = new Slider(0, 8, 2);
         sldMinSurvive.setShowTickLabels(true);

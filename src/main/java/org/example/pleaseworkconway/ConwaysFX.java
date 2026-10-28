@@ -26,12 +26,17 @@ public class ConwaysFX extends Application {
      *
      * progress:
      * 16/8/26 - got the thing to start, started coding the main project
-     * 17/8/26 - fixed all the logic issues in game, as well as making it functional, with GUI (autostep, step, randomise board, speed slider, pick which squares can be changed, endgame)
+     * 17/8/26 - fixed all the logic issues in game, as well as making it functional, with GUI (autostep, step,
+     *  randomise board, speed slider, pick which squares can be changed, endgame)
      * 18/7/26 - added finishing touches to make it easier to understand (more labels (lblFill and lblExplain))
      * 21/8/26 - added the feature where when you toggle a cell directly it stops the timeline
      * 24/10/26 - added the inversley proportional button size feature, and started to perfect it
      *  also added the section to make it not go over the screen, no matter the resolution
      * 27/10/27 - added the starter stage, in order to let people change their simulation settings
+     * 28/10/26 - added the WORLD OF COLOURS: changed the ambient colours to a dark mode, might make
+     *  it so that you can swap between them, but that might be further scope creep. Furthermore,
+     *  as cells age their colours do as well, going from a dark brick-red, to an aquamarine
+     *  gradient, should probably add an explanation
      *
      * What did I learn?
      *      Basic functions of JavaFX

@@ -144,7 +144,7 @@ public class ConwaysFX extends Application {
 
     public static VBox buildStarterPanel()
     {
-        Label explain = new Label("EPILEPSY WARNING: If you suffer from epileptic seizures or other issues, then do not increase the autospeed too high, for flashing lights..");
+        Label explain = new Label("EPILEPSY WARNING: If you suffer from epileptic seizures or other issues, then do not increase the autospeed too high, for flashing lights.");
         explain.setWrapText(true);
         explain.setMaxWidth(512);
 

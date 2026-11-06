@@ -37,6 +37,8 @@ public class ConwaysFX extends Application {
      *  it so that you can swap between them, but that might be further scope creep. Furthermore,
      *  as cells age their colours do as well, going from a dark brick-red, to an aquamarine
      *  gradient, should probably add an explanation
+     * 6/11/26 - added a feature to go back to the settings after initating
+     *
      *
      * What did I learn?
      *      Basic functions of JavaFX
@@ -47,6 +49,11 @@ public class ConwaysFX extends Application {
 
     //creating the way to make the things
     public static Random rand = new Random();
+
+
+
+    public static Stage stage;
+
 
     public static double dScreenHeight;
     public static double dScreenWidth;
@@ -114,25 +121,32 @@ public class ConwaysFX extends Application {
 
     //start to do the GUI
 
+   public static void startTheSettings()
+   {
+       VBox starterPanel = buildStarterPanel();
+
+       BorderPane starterRoot = new BorderPane();
+       starterRoot.setCenter(starterPanel);
+
+       Scene starter = new Scene(starterRoot);
+       starter.getStylesheets().add(ConwaysFX.class.getResource("darkMode.css").toExternalForm());
+
+       stage.setWidth(512);
+
+       stage.setScene(starter);
+       stage.setTitle("Conway's Game of Life");
+       stage.show();
+   }
+
     //builds the stage / scene to put everything on
     @Override
     public void start(Stage stage) {
         dScreenHeight = Screen.getPrimary().getVisualBounds().getHeight();
         dScreenWidth = Screen.getPrimary().getVisualBounds().getWidth();
 
-        VBox starterPanel = buildStarterPanel();
+        this.stage = stage;
 
-        BorderPane starterRoot = new BorderPane();
-        starterRoot.setCenter(starterPanel);
-
-        Scene starter = new Scene(starterRoot);
-        starter.getStylesheets().add(ConwaysFX.class.getResource("darkMode.css").toExternalForm());
-
-        stage.setWidth(512);
-
-        stage.setScene(starter);
-        stage.setTitle("Conway's Game of Life");
-        stage.show();
+        startTheSettings();
     }
 
     public static Button btnStart;
@@ -142,6 +156,12 @@ public class ConwaysFX extends Application {
     public static int iMinBirth = 3;
     public static int iMaxBirth = 3;
 
+    public static Slider sldSize = new Slider(5, 100, 50);
+    public static Slider sldMinSurvive = new Slider(0, 8, 2);
+    public static Slider sldMaxSurvive = new Slider(0, 8, 3);
+    public static Slider sldMinBirth = new Slider(0, 8, 3);
+    public static Slider sldMaxBirth = new Slider(0, 8, 3);
+
     public static VBox buildStarterPanel()
     {
         Label explain = new Label("EPILEPSY WARNING: If you suffer from epileptic seizures or other issues, then do not increase the autospeed too high, for flashing lights.");
@@ -149,9 +169,9 @@ public class ConwaysFX extends Application {
         explain.setMaxWidth(512);
 
         //size
-        Slider sldSize = new Slider(5, 100, 50);
         sldSize.setShowTickLabels(true);
         sldSize.setShowTickMarks(true);
+        sldSize.setMajorTickUnit(5);
 
         Label lblSize = new Label("Enter the size of the grid");
         sldSize.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -166,9 +186,11 @@ public class ConwaysFX extends Application {
             explainTwo.setWrapText(true);
             explainTwo.setMaxWidth(512);
 
-        Slider sldMinSurvive = new Slider(0, 8, 2);
         sldMinSurvive.setShowTickLabels(true);
         sldMinSurvive.setShowTickMarks(true);
+        sldMinSurvive.setMajorTickUnit(1);
+        sldMinSurvive.setMinorTickCount(1);
+
 
         Label lblMinSurvive = new Label("Enter the minimum neighbour count to survive");
         sldMinSurvive.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -177,9 +199,11 @@ public class ConwaysFX extends Application {
         });
 
         //max survive
-        Slider sldMaxSurvive = new Slider(0, 8, 3);
         sldMaxSurvive.setShowTickLabels(true);
         sldMaxSurvive.setShowTickMarks(true);
+        sldMaxSurvive.setMajorTickUnit(1);
+        sldMaxSurvive.setMinorTickCount(1);
+
 
         Label lblMaxSurvive = new Label("Enter the maximum neighbour count to survive");
         sldMaxSurvive.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -188,9 +212,10 @@ public class ConwaysFX extends Application {
         });
 
         //min birth
-        Slider sldMinBirth = new Slider(0, 8, 3);
         sldMinBirth.setShowTickLabels(true);
         sldMinBirth.setShowTickMarks(true);
+        sldMinBirth.setMajorTickUnit(1);
+        sldMinBirth.setMinorTickCount(1);
 
         Label lblMinBirth = new Label("Enter the minimum neighbour count to be born");
         sldMinBirth.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -199,9 +224,10 @@ public class ConwaysFX extends Application {
         });
 
         //max birth
-        Slider sldMaxBirth = new Slider(0, 8, 3);
         sldMaxBirth.setShowTickLabels(true);
         sldMaxBirth.setShowTickMarks(true);
+        sldMaxBirth.setMajorTickUnit(1);
+        sldMaxBirth.setMinorTickCount(1);
 
         Label lblMaxBirth = new Label("Enter the maximum neighbour count to be born");
         sldMaxBirth.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -213,6 +239,7 @@ public class ConwaysFX extends Application {
         btnStart = new Button("Start the simulation.");
         btnStart.setOnAction(e -> startButton());
 
+
         VBox panel = new VBox(8, explain, lblSize, sldSize, explainTwo, lblMinSurvive, sldMinSurvive, lblMaxSurvive, sldMaxSurvive, lblMinBirth, sldMinBirth, lblMaxBirth, sldMaxBirth, btnStart);
 
         panel.setAlignment(Pos.CENTER);
@@ -222,8 +249,7 @@ public class ConwaysFX extends Application {
         return(panel);
     }
 
-        public static void startButton()
-        {
+        public static void startButton() {
             if((iMaxBirth < iMinBirth) || (iMaxSurvive < iMinSurvive))
             {
                 return;
@@ -253,7 +279,6 @@ public class ConwaysFX extends Application {
 
             updateLabels();
         }
-
 
     //create the grid
     private static GridPane buildGrid() {
@@ -406,8 +431,15 @@ public class ConwaysFX extends Application {
             }
         });
 
+        //Go back to settings
+        Button btnSetting = new Button("Go back to the settings");
+        Stage stage = new Stage();
+        btnSetting.setOnAction(e -> startTheSettings());
+
+        Label lblEmpty = new Label("");
+
         //where all the items go
-        VBox box = new VBox(12, lblExplain, lblFill, lblGens, lblPopul, btnStep, btnAuto, btnReset, btnEnd, btnRand, lblSpeed, sldSpeed );
+        VBox box = new VBox(12, lblExplain, lblFill, lblGens, lblPopul, btnStep, btnAuto, btnReset, btnEnd, btnRand, lblSpeed, sldSpeed, lblEmpty, btnSetting);
         box.setPadding(new Insets(10));
         box.setAlignment(Pos.TOP_CENTER);
         box.setPrefWidth(175);
